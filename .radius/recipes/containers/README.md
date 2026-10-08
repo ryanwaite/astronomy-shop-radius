@@ -186,40 +186,79 @@ parameters: {
 }
 ```
 
-The target Environment must then reference that pack. Radius rejects an
-Environment when two attached packs define the same resource type,
-case-insensitively. The managed default Kubernetes pack already defines
-`Radius.Compute/containers`, so the derivative cannot be appended alongside
-that pack.
+The target Environment must then reference a pack containing that mapping.
+Radius rejects an Environment when two attached packs define the same resource
+type, case-insensitively, so a second pack cannot be appended alongside the
+selected provider pack.
 
-The deployment workflow's custom-pack action preserves existing packs,
-including the default pack. Using it unchanged for this derivative would
-therefore fail Environment validation rather than override the default
-container recipe. A supported registration increment must instead establish a
-replacement pack that contains every recipe the Shop model relies on and
-replaces the default pack atomically, or use another operator-owned Environment
-configuration that attaches only non-conflicting packs. It must not silently
-drop the existing `Radius.Compute/containerImages` or
-`Radius.Security/secrets` recipes.
+The operator-owned replacement is `.radius/custom-recipe-pack.bicep`. It is
+based on the exact Radius 0.61.1 Azure pack selected by the generated Azure
+workflow:
 
-This conclusion was checked against:
+- Radius release: `v0.61.1`, commit
+  `b913c13618039677b8727a2063cc853142cdb7c9`
+- Catalog: `deploy/manifest/defaults.yaml`, SHA-256
+  `18b6f162fcf167e9f482d48faf4e0088552b2e97c34d5299d6545172cf97c068`
+- Recipe-pack source: `radius-project/resource-types-contrib` commit
+  `18142182e52e19a46b0ed172037357e8e142dcd2`,
+  `recipe-packs/azure/aks-recipepack.bicep`
+- Raw recipe-pack SHA-256:
+  `554719844f1cffde51e9d572c9e7e50032d1a0ef6e42484a24622228b4bf4add`
+- Effective baseline SHA-256 after the generated workflow pins Kubernetes
+  recipe aliases:
+  `f1caf87b24047406e51bcd3a1b0a4cd0d86cd15c4b73150030553ba04fb352e8`
+
+The replacement retains all 15 baseline recipe types and their complete
+parameters and outputs. Its only recipe-entry substitution is
+`Radius.Compute/containers`, which points to the published derivative and
+supplies the exact Shop host paths with the read-only control enabled. Every
+other Kubernetes recipe uses the same immutable resource-type commit the
+generated workflow selects. Separately, the pack's existing top-level inputs
+receive repository-specific defaults because the shared custom-pack action
+does not forward the provider step's arguments.
+
+The pack keeps the existing `azure-avm` resource name. The generated workflow
+first deploys and attaches that provider pack while removing the default pack,
+then its existing custom-pack action deploys
+`.radius/custom-recipe-pack.bicep`. Deploying the same pack identity updates it
+in place; resolving and unioning the same resource ID is idempotent and
+preserves unrelated non-conflicting attachments.
+
+The custom-pack action does not pass recipe-pack parameters. The operator file
+therefore gives the existing parameters the exact defaults selected by the
+generated workflow for this repository:
+
+- Gateway: `radius` in `radius-system`
+- Build registry: `ghcr.io/ryanwaite/astronomy-shop-radius`
+- Registry Secret: `radius-ghcr-registry-creds`
+- PostgreSQL server configurations: empty
+
+If GitHub Environment variables override those generated-workflow defaults,
+the operator file must be updated to the same values before deployment. The
+current shared action has no supported mechanism for forwarding those
+overrides into a repository-authored replacement pack.
+
+This integration was checked against:
 
 - `radius-project/radius` commit
   `b8300b4bb7dc01ac379f127637de138d8ce4e99f`, whose Environment controller
-  returns a conflict when different attached packs define the same resource
-  type; and
+  rejects duplicate resource types across attached packs; and
 - `radius-project/ai-extensions` commit
-  `21ebde52bf8979f3765bd675356780731e422f63`, whose
-  `apply-custom-recipe-packs` action deploys custom packs and unions them with
-  the Environment's existing packs.
+  `21ebde52bf8979f3765bd675356780731e422f63`, whose Azure workflow removes the
+  default pack before attaching `azure-avm`, and whose custom-pack action
+  deploys a repository-authored pack before unioning its resolved ID with the
+  Environment's existing attachments.
 
-No replacement pack or Environment update has been authored or applied in this
-increment. The next authoring increment must create that replacement pack using
-the published tag above, preserve every other recipe required by the selected
-Shop model, and update the deployment workflow or operator-owned Environment
-definition so the replacement is attached without the conflicting default
-pack. Executed recipe evaluation remains a separate validation step after that
-registration source exists.
+Offline tests verify nonempty inventory equality, exact preservation of every
+unrelated recipe block, case-insensitive duplicate rejection, preservation of
+unrelated attachments, absent and ambiguous original mappings, idempotent
+already-replaced state, immutable Kubernetes recipe pins, and the host-path
+guard mutations. No supported standalone compiler is exposed for a recipe-pack
+Bicep file: `radius_publish_recipe` is specific to recipe modules, while the
+workflow compiles this pack only as part of a live deployment. The pack is
+therefore source-validated but not compiled or registered in this increment.
+Live Environment evidence and executed recipe input evaluation remain required
+before the application model can rely on this registration.
 
 The recipe is not registered to an Environment and does not make the Shop
 model, deployment, runtime comparison, or benchmark fixture eligible.
