@@ -3,8 +3,19 @@
   "upstreamCommit": "18142182e52e19a46b0ed172037357e8e142dcd2",
   "upstreamPath": "Compute/containers/recipes/kubernetes/bicep/kubernetes-containers.bicep",
   "upstreamSha256": "607cc7ad043231f91392a86d85b1899eafab2cc27c2ec6aeed3b55182fcd4fc7",
-  "derivativeSha256": "633f503580186e8456e71922462f1572670980b260f07c07a54b86a1e00718c9",
+  "derivativeSha256": "e818a73ffc4660edc44a13e2e91f934559327929dccbd8edb1e0f633a1f3c6b7",
   "license": "Apache-2.0",
   "policyPullRequest": "https://github.com/ryanwaite/radius-performance-demo/pull/25",
-  "policyCommit": "c02036ec120474edaf5fd4e28e2981bd42fdbda9"
+  "policyCommit": "c02036ec120474edaf5fd4e28e2981bd42fdbda9",
+  "managedCompile": {
+    "date": "2026-10-08",
+    "tool": "radius_publish_recipe",
+    "target": "br:ghcr.io/ryanwaite/astronomy-shop-radius/containers-hostpath:experimental-af56964",
+    "result": "success-before-registry-upload"
+  },
+  "publication": {
+    "result": "failed",
+    "reason": "The stored GitHub token lacks the write:packages scope; GHCR rejected the blob upload with HTTP 403.",
+    "artifactPublished": false
+  }
 }

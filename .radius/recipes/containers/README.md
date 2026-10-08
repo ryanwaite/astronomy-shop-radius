@@ -105,7 +105,7 @@ Kubernetes node and intended collector configuration.
 The paths refer to the Kubernetes node, which may be a VM rather than the
 developer workstation.
 
-## Offline checks and current blocker
+## Validation evidence and current blocker
 
 Run the source and guard-mutation checks with the Node interpreter supplied by
 the Radius extension:
@@ -118,10 +118,31 @@ These checks verify pinned provenance and fail when critical gates, collision
 checks, or generated host-volume fields are removed. They do not execute the
 Bicep recipe and cannot establish generated Kubernetes manifest behavior.
 
-The supported Radius tooling available to this repository can validate an
-application model or publish a recipe to a registry. This increment is not
-authorized to publish, and direct `rad` or managed-binary invocation is
-prohibited. The recipe therefore remains **uncompiled and unpackaged** until a
-supported local compiler path is available. It is not registered to an
-Environment and does not make the Shop model, deployment, runtime comparison,
-or benchmark fixture eligible.
+On October 8, 2026, the managed `radius_publish_recipe` tool built this recipe
+successfully while preparing the immutable experimental target:
+
+```text
+br:ghcr.io/ryanwaite/astronomy-shop-radius/containers-hostpath:experimental-af56964
+```
+
+The first managed compile rejected an invalid standard-volume source-count
+expression. The expression was repaired to count matching source names with
+`filter()` and `length()`. A second managed invocation completed the Bicep
+build, then GHCR rejected the blob upload with HTTP 403 because the active
+stored GitHub token does not have the `write:packages` scope.
+
+This is real compiler evidence, but its boundary is narrow:
+
+- the derivative compiles as a Radius Bicep recipe;
+- no OCI artifact, digest, or compiled package was published or fetched;
+- no positive or negative recipe input was evaluated;
+- no generated Kubernetes Deployment or Pod manifest was inspected; and
+- the source and mutation tests are not substitutes for recipe execution.
+
+Direct `rad`, direct Bicep invocation, package-visibility changes, and CLI
+fallback publication remain prohibited. Publication can resume with the same
+unused immutable tag after the stored package credential is granted
+`write:packages`.
+
+The recipe is not registered to an Environment and does not make the Shop
+model, deployment, runtime comparison, or benchmark fixture eligible.

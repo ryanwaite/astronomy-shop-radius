@@ -24,11 +24,12 @@ var containerItems = items(resourceProperties.?containers ?? {})
 
 var standardVolumeItems = items(resourceProperties.?volumes ?? {})
 var standardVolumeNames = map(standardVolumeItems, volume => toLower(volume.key))
-var invalidStandardVolumeItems = filter(standardVolumeItems, volume =>
-  (contains(volume.value, 'persistentVolume') ? 1 : 0) +
-  (contains(volume.value, 'secretName') ? 1 : 0) +
-  (contains(volume.value, 'emptyDir') ? 1 : 0) != 1
-)
+var standardVolumeSourceNames = [
+  'persistentVolume'
+  'secretName'
+  'emptyDir'
+]
+var invalidStandardVolumeItems = filter(standardVolumeItems, volume => length(filter(standardVolumeSourceNames, sourceName => contains(volume.value, sourceName))) != 1)
 var validatedStandardVolumeItems = length(invalidStandardVolumeItems) == 0
   ? standardVolumeItems
   : fail('Every standard volume must specify exactly one source: persistentVolume, secretName, or emptyDir.')
