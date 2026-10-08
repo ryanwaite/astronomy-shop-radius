@@ -1,16 +1,16 @@
 extension radius
 
 @description('Name of the Kubernetes Gateway resource that Radius.Compute/routes attach to. Must already exist in the cluster.')
-param routesGatewayName string = 'radius'
+param routesGatewayName string
 
 @description('Namespace where the Kubernetes Gateway resource for Radius.Compute/routes is located.')
-param routesGatewayNamespace string = 'radius-system'
+param routesGatewayNamespace string = 'default'
 
 @description('Registry path (e.g. ghcr.io/my-org) that Radius.Compute/containerImages pushes built images to.')
-param containerImagesRegistry string = 'ghcr.io/ryanwaite/astronomy-shop-radius'
+param containerImagesRegistry string
 
 @description('Name of the Kubernetes Secret holding registry credentials for Radius.Compute/containerImages. Leave empty for an unauthenticated registry.')
-param containerImagesRegistrySecretName string = 'radius-ghcr-registry-creds'
+param containerImagesRegistrySecretName string = ''
 
 @description('Server parameters forwarded to the AVM PostgreSQL flexible server configurations array for Radius.Data/postgreSqlDatabases, using the AVM item shape with name, source, and value fields. Commonly used to allow-list extensions via the azure.extensions parameter (for example to enable pgvector). Setting require_secure_transport here overrides the transport policy the resource requests through its tls property. See recipe-packs/azure/README.md for an example and a link to the supported extensions. Defaults to an empty array (no extra server configuration).')
 param postgreSqlServerConfigurations array = []

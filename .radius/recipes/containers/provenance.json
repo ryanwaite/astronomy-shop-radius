@@ -35,11 +35,14 @@
   "registrationInvestigation": {
     "radiusCommit": "b8300b4bb7dc01ac379f127637de138d8ce4e99f",
     "aiExtensionsCommit": "21ebde52bf8979f3765bd675356780731e422f63",
-    "result": "replacement-pack-authored",
-    "reason": "Radius rejects duplicate resource types across attached packs. The generated Azure workflow removes the default pack and attaches azure-avm before applying repository custom packs, so the repository pack uses the same azure-avm identity for an in-place replacement."
+    "result": "prospective-azure-example-authored",
+    "selectedTarget": "local-podman",
+    "reason": "Radius rejects duplicate resource types across attached packs. The Azure example demonstrates same-resource replacement for a possible later AKS target, but no current application or Environment evidence selects Azure."
   },
   "replacementRecipePack": {
-    "file": ".radius/custom-recipe-pack.bicep",
+    "file": ".radius/recipes/containers/integrations/azure-v0.61.1-replacement.bicep",
+    "status": "prospective-example",
+    "selectedForCurrentTarget": false,
     "managedRadiusVersion": "0.61.1",
     "radiusReleaseCommit": "b913c13618039677b8727a2063cc853142cdb7c9",
     "catalogSha256": "18b6f162fcf167e9f482d48faf4e0088552b2e97c34d5299d6545172cf97c068",
@@ -48,10 +51,13 @@
     "baselinePath": "recipe-packs/azure/aks-recipepack.bicep",
     "baselineSha256": "554719844f1cffde51e9d572c9e7e50032d1a0ef6e42484a24622228b4bf4add",
     "effectiveBaselineSha256": "f1caf87b24047406e51bcd3a1b0a4cd0d86cd15c4b73150030553ba04fb352e8",
-    "replacementSha256": "9938493427ab15ea21f1911b70aac3b7849dd2be067cd2e70b3958f5a643f255",
+    "replacementSha256": "01bf5476636e5374322909722a2b3494f5c990312963e16b6c518ad2c4b7e694",
     "packName": "azure-avm",
     "recipeCount": 15,
-    "attachmentMode": "same-resource-in-place-replacement",
+    "attachmentMode": "prospective-same-resource-in-place-replacement",
+    "autoDiscovered": false,
+    "applicableToPinnedCustomPackAction": false,
+    "applicabilityBlocker": "The pinned custom-pack action passes no Bicep parameters, while the baseline pack requires the actual Gateway and container registry values. The example remains fail-closed until a target-specific integration forwards exact operator configuration.",
     "compiled": false,
     "registered": false,
     "recipeInputsEvaluated": false

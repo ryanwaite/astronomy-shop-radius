@@ -191,9 +191,16 @@ Radius rejects an Environment when two attached packs define the same resource
 type, case-insensitively, so a second pack cannot be appended alongside the
 selected provider pack.
 
-The operator-owned replacement is `.radius/custom-recipe-pack.bicep`. It is
-based on the exact Radius 0.61.1 Azure pack selected by the generated Azure
-workflow:
+No application or Environment evidence selects Azure for the current
+benchmark. The selected runtime direction is local Podman, so this repository
+does not install an auto-discovered `.radius/custom-recipe-pack.bicep` and the
+published recipe introduces no Azure or Kubernetes dependency into the local
+setup.
+
+For a possible later Azure Kubernetes Service deployment,
+`integrations/azure-v0.61.1-replacement.bicep` records a prospective,
+non-selected integration example. It is based on the exact Radius 0.61.1 Azure
+pack used by the generated Azure workflow:
 
 - Radius release: `v0.61.1`, commit
   `b913c13618039677b8727a2063cc853142cdb7c9`
@@ -208,35 +215,39 @@ workflow:
   recipe aliases:
   `f1caf87b24047406e51bcd3a1b0a4cd0d86cd15c4b73150030553ba04fb352e8`
 
-The replacement retains all 15 baseline recipe types and their complete
+The prospective replacement retains all 15 baseline recipe types and their complete
 parameters and outputs. Its only recipe-entry substitution is
 `Radius.Compute/containers`, which points to the published derivative and
 supplies the exact Shop host paths with the read-only control enabled. Every
 other Kubernetes recipe uses the same immutable resource-type commit the
-generated workflow selects. Separately, the pack's existing top-level inputs
-receive repository-specific defaults because the shared custom-pack action
-does not forward the provider step's arguments.
+generated workflow selects.
 
-The pack keeps the existing `azure-avm` resource name. The generated workflow
-first deploys and attaches that provider pack while removing the default pack,
-then its existing custom-pack action deploys
-`.radius/custom-recipe-pack.bicep`. Deploying the same pack identity updates it
-in place; resolving and unioning the same resource ID is idempotent and
-preserves unrelated non-conflicting attachments.
+The inventory comparison uses the effective workflow baseline, not the raw
+source file. The generated workflow transforms every
+`ghcr.io/radius-project/kube-recipes/*:latest` source in the raw pack to the
+resource-type catalog commit
+`18142182e52e19a46b0ed172037357e8e142dcd2`. The tests apply that exact
+transformation when pinning expected recipe-block hashes. They require all 15
+types to remain present and require every non-container recipe block to match
+the transformed baseline byte-for-byte.
 
-The custom-pack action does not pass recipe-pack parameters. The operator file
-therefore gives the existing parameters the exact defaults selected by the
-generated workflow for this repository:
+The example keeps the existing `azure-avm` resource name. At the pinned
+ai-extensions revision, the Azure workflow first removes the default pack and
+attaches `azure-avm`; a later create-or-replace deployment of the same resource
+ID would update that pack in place rather than create a transient second pack.
+The attachment helper then unions the same resolved ID idempotently and
+preserves unrelated attachments. This is static control-flow evidence, not an
+observed Environment update.
 
-- Gateway: `radius` in `radius-system`
-- Build registry: `ghcr.io/ryanwaite/astronomy-shop-radius`
-- Registry Secret: `radius-ghcr-registry-creds`
-- PostgreSQL server configurations: empty
-
-If GitHub Environment variables override those generated-workflow defaults,
-the operator file must be updated to the same values before deployment. The
-current shared action has no supported mechanism for forwarding those
-overrides into a repository-authored replacement pack.
+The shared custom-pack action only auto-discovers
+`.radius/custom-recipe-pack.bicep` and passes no Bicep parameters. The
+prospective example deliberately remains outside that path and retains the
+baseline's required `routesGatewayName` and `containerImagesRegistry` inputs.
+Copying it into the auto-discovered location would therefore fail closed rather
+than silently reset actual operator values. The example is inapplicable until a
+specific Kubernetes Environment is selected and a supported integration passes
+its exact Gateway, registry, registry-Secret, and PostgreSQL configuration
+values.
 
 This integration was checked against:
 
@@ -249,16 +260,23 @@ This integration was checked against:
   deploys a repository-authored pack before unioning its resolved ID with the
   Environment's existing attachments.
 
-Offline tests verify nonempty inventory equality, exact preservation of every
-unrelated recipe block, case-insensitive duplicate rejection, preservation of
-unrelated attachments, absent and ambiguous original mappings, idempotent
-already-replaced state, immutable Kubernetes recipe pins, and the host-path
+Offline tests verify nonempty inventory equality against the transformed
+baseline, exact preservation of every unrelated recipe block,
+case-insensitive duplicate rejection, preservation of unrelated attachments,
+absent and ambiguous original mappings, idempotent already-replaced state,
+immutable Kubernetes recipe pins, required operator inputs, and the host-path
 guard mutations. No supported standalone compiler is exposed for a recipe-pack
 Bicep file: `radius_publish_recipe` is specific to recipe modules, while the
-workflow compiles this pack only as part of a live deployment. The pack is
-therefore source-validated but not compiled or registered in this increment.
-Live Environment evidence and executed recipe input evaluation remain required
-before the application model can rely on this registration.
+workflow compiles a pack only as part of a live deployment. The prospective
+example is therefore source-validated but not compiled or registered.
+
+The concrete next decision does not assume Azure: either the authoring product
+must define a supported model-only/local contract that accepts the published
+recipe evidence without an Environment registration, or the owner must select
+a specific future Kubernetes provider and supply its exact operator
+configuration through a supported pack-deployment path. Until one of those
+contracts exists, the full local Shop model must not claim Environment Recipe
+registration.
 
 The recipe is not registered to an Environment and does not make the Shop
 model, deployment, runtime comparison, or benchmark fixture eligible.

@@ -1,18 +1,28 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const testsDirectory = path.dirname(fileURLToPath(import.meta.url));
 const radiusDirectory = path.resolve(testsDirectory, "../../..");
-const replacementPath = path.join(radiusDirectory, "custom-recipe-pack.bicep");
+const replacementPath = path.join(
+  radiusDirectory,
+  "recipes",
+  "containers",
+  "integrations",
+  "azure-v0.61.1-replacement.bicep"
+);
 const provenancePath = path.join(
   radiusDirectory,
   "recipes",
   "containers",
   "provenance.json"
+);
+const autoDiscoveredPackPath = path.join(
+  radiusDirectory,
+  "custom-recipe-pack.bicep"
 );
 const [replacement, provenanceText] = await Promise.all([
   readFile(replacementPath, "utf8"),
@@ -28,6 +38,8 @@ const defaultPackId =
 const replacementPackId =
   "/planes/radius/local/resourceGroups/default/providers/Radius.Core/recipePacks/azure-avm";
 
+// Hashes are from the v0.61.1 Azure pack after the pinned workflow replaces
+// every Kubernetes recipe's mutable latest tag with resourceTypesCommit.
 const baselineRecipeHashes = {
   "Radius.Data/redisCaches":
     "f2cb4eccc4dc1f952d6b2e7e89bbdd8b6b9926a3fee03d1766eba9e0b5c445ae",
@@ -154,16 +166,17 @@ function replacementContractErrors(source) {
     }
   }
 
-  const requiredOperatorDefaults = [
-    "param routesGatewayName string = 'radius'",
-    "param routesGatewayNamespace string = 'radius-system'",
-    "param containerImagesRegistry string = 'ghcr.io/ryanwaite/astronomy-shop-radius'",
-    "param containerImagesRegistrySecretName string = 'radius-ghcr-registry-creds'",
+  const requiredOperatorInputs = [
+    "param routesGatewayName string",
+    "param routesGatewayNamespace string = 'default'",
+    "param containerImagesRegistry string",
+    "param containerImagesRegistrySecretName string = ''",
     "param postgreSqlServerConfigurations array = []"
   ];
-  for (const fragment of requiredOperatorDefaults) {
-    if (!source.includes(fragment)) {
-      errors.push(`Missing operator replacement-pack default: ${fragment}`);
+  const sourceLines = source.split("\n");
+  for (const fragment of requiredOperatorInputs) {
+    if (!sourceLines.includes(fragment)) {
+      errors.push(`Changed prospective baseline input: ${fragment}`);
     }
   }
 
@@ -225,7 +238,16 @@ test("preserves the complete effective baseline except containers", () => {
   );
 });
 
-test("plans an idempotent in-place attachment and preserves unrelated packs", () => {
+test("keeps the Azure example outside current workflow auto-discovery", async () => {
+  await assert.rejects(access(autoDiscoveredPackPath), { code: "ENOENT" });
+  assert.equal(
+    provenance.replacementRecipePack.selectedForCurrentTarget,
+    false
+  );
+  assert.equal(provenance.registrationInvestigation.selectedTarget, "local-podman");
+});
+
+test("plans a prospective idempotent update and preserves unrelated packs", () => {
   const otherPack =
     "/planes/radius/local/resourceGroups/default/providers/Radius.Core/recipePacks/telemetry";
   const existing = [replacementPackId, otherPack];
@@ -320,13 +342,13 @@ const contractMutations = [
     expected: "Replacement pack contains an unpinned Kubernetes recipe."
   },
   {
-    name: "dropping the repository registry default",
+    name: "silently defaulting the operator registry",
     mutate: (source) =>
       source.replace(
-        "param containerImagesRegistry string = 'ghcr.io/ryanwaite/astronomy-shop-radius'",
-        "param containerImagesRegistry string"
+        "param containerImagesRegistry string",
+        "param containerImagesRegistry string = 'ghcr.io/ryanwaite/astronomy-shop-radius'"
       ),
-    expected: "Missing operator replacement-pack default"
+    expected: "Changed prospective baseline input"
   }
 ];
 
