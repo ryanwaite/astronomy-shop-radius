@@ -105,7 +105,7 @@ Kubernetes node and intended collector configuration.
 The paths refer to the Kubernetes node, which may be a VM rather than the
 developer workstation.
 
-## Validation evidence and current blocker
+## Validation and publication evidence
 
 Run the source and guard-mutation checks with the Node interpreter supplied by
 the Radius extension:
@@ -118,8 +118,8 @@ These checks verify pinned provenance and fail when critical gates, collision
 checks, or generated host-volume fields are removed. They do not execute the
 Bicep recipe and cannot establish generated Kubernetes manifest behavior.
 
-On October 8, 2026, the managed `radius_publish_recipe` tool built this recipe
-successfully while preparing the immutable experimental target:
+On October 8, 2026, the managed `radius_publish_recipe` tool built and
+published this recipe to the immutable experimental target:
 
 ```text
 br:ghcr.io/ryanwaite/astronomy-shop-radius/containers-hostpath:experimental-af56964
@@ -127,30 +127,47 @@ br:ghcr.io/ryanwaite/astronomy-shop-radius/containers-hostpath:experimental-af56
 
 The first managed compile rejected an invalid standard-volume source-count
 expression. The expression was repaired to count matching source names with
-`filter()` and `length()`. A second managed invocation completed the Bicep
-build, then GHCR rejected the blob upload with HTTP 403 because the active
-stored GitHub token does not have the `write:packages` scope.
+`filter()` and `length()`. GHCR initially rejected upload because the active
+stored credential lacked package scope. After the repository owner completed
+the supported GitHub authorization, the managed publisher succeeded without
+changing package visibility.
 
-The managed publication was retried and failed at the same upload boundary.
-The only other stored GitHub account has `write:packages` but has pull-only
-access to `ryanwaite/astronomy-shop-radius`, so it cannot publish this
-repository-owned package. The supported remediation is to grant
-`read:packages` and `write:packages` to the stored `ryanwaite` account; that
-changes persistent GitHub CLI token scopes and requires explicit user approval
-and browser authorization.
+Published identity:
+
+- GHCR package:
+  `ryanwaite/astronomy-shop-radius/containers-hostpath`
+- Tag: `experimental-af56964`
+- Package version ID: `1354574463`
+- Visibility: private
+- Manifest digest:
+  `sha256:633ae50ea645e8d19d71de2bcf03e7266dc1c5e2675fe00cfad21f391a5457e3`
+- Bicep module layer digest:
+  `sha256:3b60a06798e00e66c583527b3fff8a2f73f95943688776c1df53714c1b471c31`
+- Bicep module config digest:
+  `sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a`
+- Compiled Bicep version: `0.42.1.51946`
+
+The published manifest and both blobs were fetched from GHCR. Their byte counts
+and SHA-256 values match the OCI descriptors. Inspection of the real compiled
+template confirmed:
+
+- the three platform parameters and their secure defaults;
+- compiled host-path request, validation, mount, and Pod-volume variables;
+- the Deployment template consumes the combined Pod volumes; and
+- the recipe still emits the Radius `result.resources` and `result.values`
+  output shape.
 
 This is real compiler evidence, but its boundary is narrow:
 
 - the derivative compiles as a Radius Bicep recipe;
-- no OCI artifact, digest, or compiled package was published or fetched;
+- the published OCI manifest and compiled Bicep template match their recorded
+  digests;
 - no positive or negative recipe input was evaluated;
 - no generated Kubernetes Deployment or Pod manifest was inspected; and
 - the source and mutation tests are not substitutes for recipe execution.
 
-Direct `rad`, direct Bicep invocation, package-visibility changes, and CLI
-fallback publication remain prohibited. Publication can resume with the same
-unused immutable tag after the stored package credential is granted
-`write:packages`.
+No direct `rad`, direct Bicep invocation, package-visibility change, or CLI
+fallback publication was used.
 
 ## Recipe-pack and Environment prerequisite
 
@@ -197,8 +214,12 @@ This conclusion was checked against:
   the Environment's existing packs.
 
 No replacement pack or Environment update has been authored or applied in this
-increment. The published artifact and digest must exist and be inspected before
-that registration source can be finalized.
+increment. The next authoring increment must create that replacement pack using
+the published tag above, preserve every other recipe required by the selected
+Shop model, and update the deployment workflow or operator-owned Environment
+definition so the replacement is attached without the conflicting default
+pack. Executed recipe evaluation remains a separate validation step after that
+registration source exists.
 
 The recipe is not registered to an Environment and does not make the Shop
 model, deployment, runtime comparison, or benchmark fixture eligible.

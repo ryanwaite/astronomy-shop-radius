@@ -7,16 +7,30 @@
   "license": "Apache-2.0",
   "policyPullRequest": "https://github.com/ryanwaite/radius-performance-demo/pull/25",
   "policyCommit": "c02036ec120474edaf5fd4e28e2981bd42fdbda9",
+  "policyMergeCommit": "0d0370923526aa459cca8af34e7fff2a86f4576e",
   "managedCompile": {
     "date": "2026-10-08",
     "tool": "radius_publish_recipe",
     "target": "br:ghcr.io/ryanwaite/astronomy-shop-radius/containers-hostpath:experimental-af56964",
-    "result": "success-before-registry-upload"
+    "result": "success"
   },
   "publication": {
-    "result": "failed",
-    "reason": "The stored ryanwaite GitHub token lacks the write:packages scope; repeated managed attempts compiled successfully and GHCR rejected the blob upload with HTTP 403. The only other stored account has write:packages but pull-only repository access.",
-    "artifactPublished": false
+    "result": "success",
+    "artifactPublished": true,
+    "package": "ryanwaite/astronomy-shop-radius/containers-hostpath",
+    "tag": "experimental-af56964",
+    "versionId": 1354574463,
+    "visibility": "private",
+    "manifestDigest": "sha256:633ae50ea645e8d19d71de2bcf03e7266dc1c5e2675fe00cfad21f391a5457e3",
+    "configDigest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "layerDigest": "sha256:3b60a06798e00e66c583527b3fff8a2f73f95943688776c1df53714c1b471c31",
+    "layerSize": 33261,
+    "bicepVersion": "0.42.1.51946",
+    "templateHash": "4321839932792582837",
+    "blobsVerified": true,
+    "compiledContractVerified": true,
+    "recipeInputsEvaluated": false,
+    "generatedManifestInspected": false
   },
   "registrationInvestigation": {
     "radiusCommit": "b8300b4bb7dc01ac379f127637de138d8ce4e99f",

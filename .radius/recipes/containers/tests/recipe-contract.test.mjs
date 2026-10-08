@@ -29,6 +29,18 @@ test("pins the exact upstream recipe", () => {
   assert.notEqual(provenance.derivativeSha256, provenance.upstreamSha256);
 });
 
+test("records the immutable published artifact", () => {
+  assert.equal(provenance.managedCompile.result, "success");
+  assert.equal(provenance.publication.result, "success");
+  assert.equal(provenance.publication.artifactPublished, true);
+  assert.equal(provenance.publication.blobsVerified, true);
+  assert.equal(provenance.publication.tag, "experimental-af56964");
+  assert.match(provenance.publication.manifestDigest, /^sha256:[0-9a-f]{64}$/);
+  assert.match(provenance.publication.configDigest, /^sha256:[0-9a-f]{64}$/);
+  assert.match(provenance.publication.layerDigest, /^sha256:[0-9a-f]{64}$/);
+  assert.match(provenance.policyMergeCommit, /^[0-9a-f]{40}$/);
+});
+
 test("keeps every required hostPath guard and output field", () => {
   assert.deepEqual(checkRecipeSource(derivative), []);
 });
