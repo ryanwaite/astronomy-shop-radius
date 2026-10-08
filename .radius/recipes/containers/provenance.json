@@ -17,5 +17,11 @@
     "result": "failed",
     "reason": "The stored GitHub token lacks the write:packages scope; GHCR rejected the blob upload with HTTP 403.",
     "artifactPublished": false
+  },
+  "registrationInvestigation": {
+    "radiusCommit": "b8300b4bb7dc01ac379f127637de138d8ce4e99f",
+    "aiExtensionsCommit": "21ebde52bf8979f3765bd675356780731e422f63",
+    "result": "replacement-pack-required",
+    "reason": "Radius rejects environments whose attached recipe packs define the same resource type, while the ai-extensions custom-pack action preserves the default pack that already defines Radius.Compute/containers."
   }
 }

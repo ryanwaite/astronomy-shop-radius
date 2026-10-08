@@ -144,5 +144,53 @@ fallback publication remain prohibited. Publication can resume with the same
 unused immutable tag after the stored package credential is granted
 `write:packages`.
 
+## Recipe-pack and Environment prerequisite
+
+Publication alone is not registration. A `Radius.Core/recipePacks` resource
+must map `Radius.Compute/containers` to the published derivative and pass these
+platform-owned defaults:
+
+```bicep
+parameters: {
+  enableHostPathVolumes: true
+  allowedHostPaths: [
+    '/'
+    '/var/run/docker.sock'
+  ]
+  requireReadOnlyHostPathMounts: true
+}
+```
+
+The target Environment must then reference that pack. Radius rejects an
+Environment when two attached packs define the same resource type,
+case-insensitively. The managed default Kubernetes pack already defines
+`Radius.Compute/containers`, so the derivative cannot be appended alongside
+that pack.
+
+The deployment workflow's custom-pack action preserves existing packs,
+including the default pack. Using it unchanged for this derivative would
+therefore fail Environment validation rather than override the default
+container recipe. A supported registration increment must instead establish a
+replacement pack that contains every recipe the Shop model relies on and
+replaces the default pack atomically, or use another operator-owned Environment
+configuration that attaches only non-conflicting packs. It must not silently
+drop the existing `Radius.Compute/containerImages` or
+`Radius.Security/secrets` recipes.
+
+This conclusion was checked against:
+
+- `radius-project/radius` commit
+  `b8300b4bb7dc01ac379f127637de138d8ce4e99f`, whose Environment controller
+  returns a conflict when different attached packs define the same resource
+  type; and
+- `radius-project/ai-extensions` commit
+  `21ebde52bf8979f3765bd675356780731e422f63`, whose
+  `apply-custom-recipe-packs` action deploys custom packs and unions them with
+  the Environment's existing packs.
+
+No replacement pack or Environment update has been authored or applied in this
+increment. The published artifact and digest must exist and be inspected before
+that registration source can be finalized.
+
 The recipe is not registered to an Environment and does not make the Shop
 model, deployment, runtime comparison, or benchmark fixture eligible.
