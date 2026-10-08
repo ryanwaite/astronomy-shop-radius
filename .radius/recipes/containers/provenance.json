@@ -15,7 +15,7 @@
   },
   "publication": {
     "result": "failed",
-    "reason": "The stored GitHub token lacks the write:packages scope; GHCR rejected the blob upload with HTTP 403.",
+    "reason": "The stored ryanwaite GitHub token lacks the write:packages scope; repeated managed attempts compiled successfully and GHCR rejected the blob upload with HTTP 403. The only other stored account has write:packages but pull-only repository access.",
     "artifactPublished": false
   },
   "registrationInvestigation": {

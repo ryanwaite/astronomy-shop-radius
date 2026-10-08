@@ -131,6 +131,14 @@ expression. The expression was repaired to count matching source names with
 build, then GHCR rejected the blob upload with HTTP 403 because the active
 stored GitHub token does not have the `write:packages` scope.
 
+The managed publication was retried and failed at the same upload boundary.
+The only other stored GitHub account has `write:packages` but has pull-only
+access to `ryanwaite/astronomy-shop-radius`, so it cannot publish this
+repository-owned package. The supported remediation is to grant
+`read:packages` and `write:packages` to the stored `ryanwaite` account; that
+changes persistent GitHub CLI token scopes and requires explicit user approval
+and browser authorization.
+
 This is real compiler evidence, but its boundary is narrow:
 
 - the derivative compiles as a Radius Bicep recipe;
