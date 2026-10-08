@@ -1,0 +1,10 @@
+{
+  "upstreamRepository": "radius-project/resource-types-contrib",
+  "upstreamCommit": "18142182e52e19a46b0ed172037357e8e142dcd2",
+  "upstreamPath": "Compute/containers/recipes/kubernetes/bicep/kubernetes-containers.bicep",
+  "upstreamSha256": "607cc7ad043231f91392a86d85b1899eafab2cc27c2ec6aeed3b55182fcd4fc7",
+  "derivativeSha256": "633f503580186e8456e71922462f1572670980b260f07c07a54b86a1e00718c9",
+  "license": "Apache-2.0",
+  "policyPullRequest": "https://github.com/ryanwaite/radius-performance-demo/pull/25",
+  "policyCommit": "c02036ec120474edaf5fd4e28e2981bd42fdbda9"
+}
